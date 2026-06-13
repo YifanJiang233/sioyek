@@ -18,9 +18,9 @@ cd ..
 sed -Ei '' "s/QMAKE_MACOSX_DEPLOYMENT_TARGET.=.[0-9]+/QMAKE_MACOSX_DEPLOYMENT_TARGET = $(sw_vers -productVersion | cut -d. -f1)/" pdf_viewer_build_config.pro
 
 if [[ $1 == portable ]]; then
-	qmake pdf_viewer_build_config.pro
+	qmake "QMAKE_CXXFLAGS+=-Wno-implicit-function-declaration" pdf_viewer_build_config.pro
 else
-	qmake "CONFIG+=non_portable" pdf_viewer_build_config.pro
+	qmake "CONFIG+=non_portable" "QMAKE_CXXFLAGS+=-Wno-implicit-function-declaration" pdf_viewer_build_config.pro
 fi
 
 make -j$MAKE_PARALLEL

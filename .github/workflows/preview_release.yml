@@ -15,7 +15,7 @@ jobs:
   upload-release:
     if: ${{ (github.event_name == 'workflow_dispatch') || (github.event_name != 'pull_request') }}
     runs-on: ubuntu-20.04
-    needs: [build-mac, build-mac-arm, build-linux, build-windows]
+    needs: [build-mac, build-mac-arm, build-mac-15, build-linux, build-windows]
 
     steps:
     - uses: actions/checkout@v1
@@ -53,6 +53,17 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./mac-arm-uploads/sioyek-release-mac-arm.zip
         asset_name: sioyek-release-mac-arm.zip
+        asset_content_type: application/zip   
+
+    - name: upload mac 15
+      id: upload-mac-15
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./mac-15-uploads/sioyek-release-mac-15.zip
+        asset_name: sioyek-release-mac-15.zip
         asset_content_type: application/zip   
 
     - name: upload linux
@@ -260,3 +271,49 @@ jobs:
       with:
         name: mac-arm-uploads
         path: sioyek-release-mac-arm.zip
+
+  build-mac-15:
+
+    runs-on: macos-15
+
+    steps:
+
+    - uses: actions/checkout@v4
+      with:
+            submodules: 'recursive'
+            ref: development
+
+    - name: Cache Homebrew packages
+      uses: actions/cache@v4
+      env:
+        cache-name: homebrew
+      with:
+        path: ~/Library/Caches/Homebrew
+        key: ${{ runner.os }}-arm-build-${{ env.cache-name }}-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-arm-build-${{ env.cache-name }}-
+          ${{ runner.os }}-arm-build-
+          ${{ runner.os }}-arm-
+
+    - name: Install dependencies
+      run:  brew install freeglut mesa harfbuzz 
+      
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.7.2'
+        modules: 'all'
+        cache: true
+
+    - name: Build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        chmod +x build_mac.sh
+        MAKE_PARALLEL=$(sysctl -n hw.logicalcpu) ./build_mac.sh
+        mv sioyek-release-mac.zip sioyek-release-mac-15.zip
+        
+    - name: upload mac artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: mac-15-uploads
+        path: sioyek-release-mac-15.zip
