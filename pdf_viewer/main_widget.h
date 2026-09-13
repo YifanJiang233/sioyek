@@ -67,6 +67,16 @@ enum class SelectionMode {
     Line
 };
 
+enum class SioyekVisibleObjectType {
+    Highlight,
+    Bookmark
+};
+
+struct SioyekVisibleObjectIndex {
+    SioyekVisibleObjectType type;
+    int index;
+};
+
 struct MenuNode {
     QString name;
     QString doc;
@@ -525,6 +535,7 @@ public:
         InputHandler* input_handler,
         CachedChecksummer* checksummer,
         bool* should_quit_ptr,
+        PdfRenderer* pdf_renderer,
         QWidget* parent = nullptr
     );
     MainWidget(MainWidget* other);
@@ -666,6 +677,8 @@ public:
     void handle_delete_highlight_under_cursor();
     void handle_delete_selected_highlight();
     void handle_delete_selected_bookmark();
+    void handle_delete_selected_annotation();
+    void handle_edit_selected_annotation();
     void handle_start_reading();
     void handle_toggle_reading();
     void handle_stop_reading();
@@ -1003,6 +1016,7 @@ public:
     void set_selected_bookmark_index(int index);
     void handle_highlight_tags_pre_perform(const std::vector<int>& visible_highlight_indices);
     void handle_visible_bookmark_tags_pre_perform(const std::vector<int>& visible_bookmark_indices);
+    void handle_visible_objects_tags_pre_perform(const std::vector<SioyekVisibleObjectIndex>& visible_object_indices);
     void clear_keyboard_select_highlights();
     void highlight_link_destination(int page, float y_offset, float x_offset);
     void handle_goto_link_with_page_and_offset(int page, float y_offset, float x_offset);
@@ -1034,6 +1048,7 @@ public:
     void delete_menu_nodes(MenuNode* items);
     void set_pending_portal(std::optional<std::wstring> doc_path, Portal portal);
     void set_pending_portal(std::optional<std::pair<std::optional<std::wstring>, Portal>> pending_portal);
+    void update_text_selection_with_begin_and_end(AbsoluteDocumentPos begin, AbsoluteDocumentPos end);
     void update_text_selection(AbsoluteDocumentPos mouse_abspos);
     int update_recent_clicks(AbsoluteDocumentPos mouse_abspos);
     void handle_triple_click(AbsoluteDocumentPos mouse_abspos);
