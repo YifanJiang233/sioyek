@@ -14,7 +14,7 @@ on:
 jobs:
   upload-release:
     if: ${{ (github.event_name == 'workflow_dispatch') || (github.event_name != 'pull_request') }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     needs: [ build-mac-15 ]
 
     steps:
